@@ -12,7 +12,6 @@ from lipnet.lipreading.helpers import labels_to_text
 from lipnet.utils.spell import Spell
 from preprocess import extract
 
-# LipNet expects frames of this shape
 IMG_C, IMG_W, IMG_H = 3, 100, 50
 FRAMES_N = 75
 ABSOLUTE_MAX_STRING_LEN = 32
@@ -22,10 +21,8 @@ def predict_from_video(video_path):
 
     temp_path = "temp_frames.npy"
 
-    print("STEP 1")
+    
     frames = extract(video_path, temp_path)
-
-    print("STEP 2")
 
     if len(frames) == 0:
         print("No frames extracted")
@@ -42,8 +39,6 @@ def predict_from_video(video_path):
         output_size=28
     )
 
-    print("STEP 3")
-
     adam = Adam(learning_rate=0.0001)
 
     lipnet.model.compile(
@@ -51,9 +46,6 @@ def predict_from_video(video_path):
         optimizer=adam
     )
 
-    print("STEP 4")
-
-   # Load pretrained weights
     weights_path = os.path.join("evaluation","models","overlapped-weights368.h5")
 
     if not os.path.exists(weights_path):
@@ -64,24 +56,20 @@ def predict_from_video(video_path):
 
     lipnet.model.load_weights(weights_path)
 
-    print("STEP 5")
 
-# frames already returned from extract()
-# shape should be: (75, 50, 100)
 
     frames = frames.astype(np.float32) / 255.0
 
-# convert grayscale -> 3 channels
+
     frames = np.stack([frames, frames, frames], axis=-1)
 
-    print("STEP 6", frames.shape)
+    
 
-# LipNet expects: (frames, width, height, channels)
     frames = np.transpose(frames, (0, 2, 1, 3))
 
-    print("STEP 7", frames.shape)
 
-# ensure exactly 75 frames
+
+
     if len(frames) < FRAMES_N:
 
         pad = np.zeros(
@@ -94,19 +82,13 @@ def predict_from_video(video_path):
     else:
         frames = frames[:FRAMES_N]
 
-    print("STEP 8", frames.shape)
-
-# add batch dimension
+    
     frames = np.expand_dims(frames, axis=0)
 
-    print("STEP 9", frames.shape)
-
-# predict
+    
     y_pred = lipnet.predict(frames)
 
-    print("STEP 10")
-
-# decode prediction
+    
     input_length = np.array([FRAMES_N])
 
     decoder = Decoder(
