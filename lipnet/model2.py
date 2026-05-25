@@ -1,9 +1,5 @@
-from keras.layers.convolutional import Conv3D, ZeroPadding3D
-from keras.layers.pooling import MaxPooling3D
-from keras.layers.core import Dense, Activation, SpatialDropout3D, Flatten
-from keras.layers.wrappers import Bidirectional, TimeDistributed
-from keras.layers.recurrent import GRU
-from keras.layers.normalization import BatchNormalization
+from keras.layers import Conv3D, ZeroPadding3D, MaxPooling3D, Dense, Activation, SpatialDropout3D, Flatten
+from keras.layers import Bidirectional, TimeDistributed, GRU, BatchNormalization
 from keras.layers import Input
 from keras.models import Model
 from lipnet.core.layers import CTC
@@ -51,8 +47,8 @@ class LipNet(object):
 
         self.resh1 = TimeDistributed(Flatten())(self.maxp3)
 
-        self.gru_1 = Bidirectional(GRU(256, return_sequences=True, kernel_initializer='Orthogonal', name='gru1'), merge_mode='concat')(self.resh1)
-        self.gru_2 = Bidirectional(GRU(256, return_sequences=True, kernel_initializer='Orthogonal', name='gru2'), merge_mode='concat')(self.gru_1)
+        self.gru_1 = Bidirectional(GRU(256, return_sequences=True, kernel_initializer='Orthogonal', name='gru1',reset_after=False), merge_mode='concat')(self.resh1)
+        self.gru_2 = Bidirectional(GRU(256, return_sequences=True, kernel_initializer='Orthogonal', name='gru2',reset_after=False), merge_mode='concat')(self.gru_1)
 
         # transforms RNN output to character activations:
         self.dense1 = Dense(self.output_size, kernel_initializer='he_normal', name='dense1')(self.gru_2)
@@ -66,14 +62,15 @@ class LipNet(object):
         self.loss_out = CTC('ctc', [self.y_pred, self.labels, self.input_length, self.label_length])
 
         self.model = Model(inputs=[self.input_data, self.labels, self.input_length, self.label_length], outputs=self.loss_out)
+        self.prediction_model = Model(
+            inputs=self.input_data,
+            outputs=self.y_pred
+            )
 
     def summary(self):
         Model(inputs=self.input_data, outputs=self.y_pred).summary()
 
     def predict(self, input_batch):
-        return self.test_function([input_batch, 0])[0]  # the first 0 indicates test
+        return self.prediction_model.predict(input_batch)
 
-    @property
-    def test_function(self):
-        # captures output of softmax so we can decode the output during visualization
-        return K.function([self.input_data, K.learning_phase()], [self.y_pred, K.learning_phase()])
+   
