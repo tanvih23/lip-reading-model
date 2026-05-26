@@ -1,5 +1,4 @@
 from unittest import result
-
 import numpy as np
 import sys
 import os
@@ -11,12 +10,13 @@ from lipnet.core.decoders import Decoder
 from lipnet.lipreading.helpers import labels_to_text
 from lipnet.utils.spell import Spell
 from preprocess import extract
-
+from preprocess import convert
 IMG_C, IMG_W, IMG_H = 3, 100, 50
 FRAMES_N = 75
 ABSOLUTE_MAX_STRING_LEN = 32
 
 def predict_from_video(video_path):
+    video_path = convert(video_path)
     print(f"Processing: {video_path}")
 
     temp_path = "temp_frames.npy"

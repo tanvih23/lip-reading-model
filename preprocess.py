@@ -2,12 +2,18 @@ import mediapipe as mp
 import cv2
 import numpy as np
 import os
+def convert(video_path):
+    if video_path.endswith(".mpg") or video_path.endswith(".mpeg"):
+        return video_path
+    output_path = video_path.rsplit('.', 1)[0] + '_converted.mp4'
+    os.system(f'ffmpeg -i "{video_path}" -vcodec libx264 "{output_path}" -y')
+    return output_path
 mpface_mesh=mp.solutions.face_mesh
 face_mesh=mpface_mesh.FaceMesh()
 LIPS=[61, 146, 91, 181, 84, 17, 314, 405, 321, 375, 291,
                  308, 324, 318, 402, 317, 14, 87, 178, 88, 95]
 def extract(video_path, save_path=None):
-
+    video_path = convert(video_path)
     cap = cv2.VideoCapture(video_path)
 
     frames = []
