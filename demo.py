@@ -1,13 +1,13 @@
 import gradio as gr
-
-def predict_lip_reading(video):
-    return "Prediction will appear here"
+from our_predict import predict_from_video
 
 demo = gr.Interface(
-    fn=predict_lip_reading,
+    fn=predict_from_video,
     inputs=gr.Video(label="Upload Video"),
     outputs=gr.Textbox(label="Predicted Text"),
-    title="Lip Reading Demo"
+    title="Lip Reading Demo",
+    description="Upload a video to predict spoken words using LipNet."
 )
 
-demo.launch()
+demo.launch(share=True)
+
