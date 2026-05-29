@@ -6,7 +6,6 @@ def run_demo(video):
     if video is None:
         return "No video uploaded"
     
-    # Gradio passes a temp file path — convert it first
     converted = convert(video)
     result = predict_from_video(converted)
     
@@ -17,7 +16,7 @@ def run_demo(video):
 
 interface = gr.Interface(
     fn=run_demo,
-    inputs=gr.Video(format="mp4"),  # tell Gradio to convert to mp4 on upload
+    inputs=gr.Video(format="mp4"), 
     outputs=gr.Textbox(label="Predicted Text"),
     title="Lip Reading Demo",
     description="Upload a video to predict spoken words using LipNet."

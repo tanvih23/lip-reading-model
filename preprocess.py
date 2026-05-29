@@ -90,9 +90,27 @@ def extract(video_path, save_path=None):
     print("Frames shape:", frames.shape)
 
     return frames
-if __name__=="__main__":
-    extract("data/s1/videos/bbaf2n.mpg",
+
+    
+def save_as_video(npy_path, output_path, fps=25):
+    frames = np.load(npy_path)
+    height, width = frames[0].shape
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    out = cv2.VideoWriter(output_path, fourcc, fps, (width, height), isColor=False)
+    for frame in frames:
+        out.write(frame)
+    out.release()
+    print(f"Video saved to {output_path}")
+
+
+if __name__ == "__main__":
+    extract(
+        "data/s1/videos/bbaf2n.mpg",
         "data/processed/bbaf2n.npy"
+    )
+    save_as_video(
+        "data/processed/bbaf2n.npy",
+        "output_cropped_lips.mp4"
     )
 
 
