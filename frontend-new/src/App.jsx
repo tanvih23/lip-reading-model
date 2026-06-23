@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import './App.css';
+import LipPreview from './LipPreview';
 
 function App() {
   const [videoFile, setVideoFile] = useState(null);
@@ -9,6 +10,7 @@ function App() {
   const [result, setResult] = useState(null);
   const [validationError, setValidationError] = useState('');
   const fileInputRef = useRef(null);
+  const videoRef = useRef(null);
 
   // Custom cursor states
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
@@ -238,8 +240,13 @@ function App() {
                 </button>
               </div>
 
-              <div className="video-element-wrapper animate-preview">
-                <video className="preview-video" src={videoPreview} controls />
+              <div className="video-with-lip">
+                <div className="video-element-wrapper animate-preview">
+                  <video ref={videoRef} className="preview-video" src={videoPreview} controls />
+                </div>
+
+                {/* Lip region preview — runs independently, does not affect Predict */}
+                <LipPreview videoRef={videoRef} videoSrc={videoPreview} />
               </div>
             </div>
           )}
