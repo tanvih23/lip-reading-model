@@ -47,7 +47,7 @@ class LipReadingDataset(Dataset):
 
         clip = np.load(file_path)
 
-        TARGET_FRAMES = 10
+        TARGET_FRAMES = 20
 
         num_frames = clip.shape[0]
 
@@ -64,11 +64,13 @@ class LipReadingDataset(Dataset):
         elif num_frames > TARGET_FRAMES:
 
             clip = clip[:TARGET_FRAMES]
-
+            
+        clip = clip[:, np.newaxis, :, :]
         clip = torch.tensor(
             clip,
             dtype=torch.float32
         )
+        clip=clip/255.0
 
         label = torch.tensor(
             label,

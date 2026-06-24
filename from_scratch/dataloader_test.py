@@ -1,4 +1,4 @@
-from dataset import LipReadingDataset
+from from_scratch.dataset import LipReadingDataset
 from torch.utils.data import DataLoader
 
 dataset = LipReadingDataset()
