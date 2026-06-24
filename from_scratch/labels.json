@@ -1,0 +1,48 @@
+{
+  "num_classes": 12,
+  "words": [
+    "again",
+    "bin",
+    "blue",
+    "green",
+    "lay",
+    "now",
+    "place",
+    "please",
+    "red",
+    "set",
+    "soon",
+    "white"
+  ],
+  "word_to_idx": {
+    "again": 0,
+    "bin": 1,
+    "blue": 2,
+    "green": 3,
+    "lay": 4,
+    "now": 5,
+    "place": 6,
+    "please": 7,
+    "red": 8,
+    "set": 9,
+    "soon": 10,
+    "white": 11
+  },
+  "idx_to_word": {
+    "0": "again",
+    "1": "bin",
+    "2": "blue",
+    "3": "green",
+    "4": "lay",
+    "5": "now",
+    "6": "place",
+    "7": "please",
+    "8": "red",
+    "9": "set",
+    "10": "soon",
+    "11": "white"
+  },
+  "speakers": ["s1", "s2", "s14", "s26"],
+  "clips_per_word_per_speaker": 15,
+  "expected_total_clips": 720
+}
