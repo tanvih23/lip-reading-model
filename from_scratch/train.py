@@ -8,7 +8,7 @@ it is each time, and nudging its weights in the direction that makes it
 less wrong.
 
 """
-
+from dataset import LipReadingDataset
 import os
 import torch
 import torch.nn as nn
@@ -117,26 +117,19 @@ def load_dummy_data():
 
 
 def load_real_data():
-    """
-    Loads Person A's real extracted GRID clips from disk.
-    Called when USE_DUMMY_DATA = False.
-
-    IMPORTANT: this function expects dataset.py to exist
-    in from_scratch/ with a class called LipReadingDataset.
-
-    """
-    # TODO: once Person B finishes dataset.py, replace this with:
-    #
-    #   from dataset import LipReadingDataset
-    #   dataset = LipReadingDataset(DATA_DIR)
-    #   loader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True)
-    #   return loader
-    #
-    raise NotImplementedError(
-        "Real data loading not wired up yet. "
-        "Either keep USE_DUMMY_DATA = True, or finish dataset.py first."
+    dataset = LipReadingDataset(
+        data_dir="data/train",
+        labels_file="labels.json"
     )
-
+    loader = DataLoader(
+        dataset,
+        batch_size=BATCH_SIZE,
+        shuffle=True
+    )
+    # Print vocab so you can confirm words loaded correctly
+    print(f"  Vocab: {dataset.word_to_idx}")
+    print(f"  Total clips: {len(dataset)}")
+    return loader
 # STEP 3: THE TRAINING LOOP
 
 def train():

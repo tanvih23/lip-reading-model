@@ -47,7 +47,7 @@ class LipReaderCNN(nn.Module):
         #   after pool 1: 64 / 2 = 32x32
         #   after pool 2: 32 / 2 = 16x16
         # Final feature maps: 32 channels (from conv2) * 16 * 16 spatial size
-        self.flattened_size = 32 * 16 * 16
+        self.flattened_size = 32 * 24 * 24  
 
         # A "Linear" layer (a.k.a. fully connected / dense layer) takes a
         # flat list of numbers in and produces a flat list of numbers out,
