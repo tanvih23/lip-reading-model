@@ -9,6 +9,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [validationError, setValidationError] = useState('');
+  const [predictError, setPredictError] = useState('');
   const fileInputRef = useRef(null);
   const videoRef = useRef(null);
 
@@ -120,14 +121,34 @@ function App() {
     if (!videoFile) return;
     setIsLoading(true);
     setResult(null);
+    setPredictError('');
 
-    setTimeout(() => {
-      setResult({
-        word: "PLACE",
-        confidence: 0.82
+    const formData = new FormData();
+    formData.append('video', videoFile);
+
+    fetch('http://localhost:8000/predict', {
+      method: 'POST',
+      body: formData,
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          const errBody = await res.json().catch(() => ({}));
+          throw new Error(errBody.detail || `Server error (${res.status})`);
+        }
+        return res.json();
+      })
+      .then((data) => {
+        setResult({
+          word: data.predicted_word,
+          confidence: data.confidence,
+        });
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        console.error('[Predict] request failed:', err);
+        setPredictError(err.message || 'Prediction failed. Is the backend running?');
+        setIsLoading(false);
       });
-      setIsLoading(false);
-    }, 1000);
   };
 
   const formatBytes = (bytes) => {
@@ -248,6 +269,15 @@ function App() {
                 {/* Lip region preview — runs independently, does not affect Predict */}
                 <LipPreview videoRef={videoRef} videoSrc={videoPreview} />
               </div>
+            </div>
+          )}
+
+          {predictError && (
+            <div className="validation-error-box">
+              <svg className="error-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <span>{predictError}</span>
             </div>
           )}
 
