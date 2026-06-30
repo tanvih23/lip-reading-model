@@ -108,7 +108,35 @@ Here is some ideas on what you can do next:
 * Go crazy and experiment on other dataset! by changing some hyperparameters or modify the model.
 
 ## Dataset
-This model uses GRID corpus (http://spandh.dcs.shef.ac.uk/gridcorpus/)
+Source
+
+This project uses a subset of the GRID Audiovisual Speech Corpus — a large, publicly available dataset of speakers reciting short sentences to camera at 25 fps.
+Subset Selection
+Rather than using the full corpus, we selected a focused subset for word-level classification:
+PropertyValueTask12-class word classificationWordsagain, bin, blue, green, lay, now, place, please, red, set, soon, whiteSpeakerss1, s2, s14, s26. Clips per word per speaker 15 Total clips 720
+Preprocessing
+Raw .mpg video files were processed using MediaPipe Face Mesh to detect and crop the lip region from each frame. Each clip was standardized to 20 frames (with ±5 context frames around the word boundary) and saved as a NumPy array of shape (20, 96, 96) — 20 grayscale frames at 96×96 pixels.
+Clip filenames encode the speaker, video ID, and frame range, e.g.:
+s1_bwag6p_f021-026.npy  →  speaker s1, video bwag6p, frames 21–26
+Directory Structure
+data/
+└── train/
+    ├── again/
+    ├── bin/
+    ├── blue/
+    ├── green/
+    ├── lay/
+    ├── now/
+    ├── place/
+    ├── please/
+    ├── red/
+    ├── set/
+    ├── soon/
+    └── white/
+Label Mapping :
+Labels are integer-encoded (see labels.json):
+json{"again": 0, "bin": 1, "blue": 2, "green": 3, "lay": 4, "now": 5,
+ "place": 6, "please": 7, "red": 8, "set": 9, "soon": 10, "white": 11}
 
 ## Pre-trained weights
 For those of you who are having difficulties in training the model (or just want to see the end results), you can download and use the weights provided here: https://github.com/rizkiarm/LipNet/tree/master/evaluation/models. 
