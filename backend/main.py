@@ -1,12 +1,21 @@
-from pathlib import Path
+import sys
 import tempfile
+from pathlib import Path
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
-from our_predict import predict_from_video
+# Make from_scratch/ importable, since inference.py internally does
+# `from model import LipReaderModel` and `from dummy_data import ...`
+# — those only resolve if from_scratch/ itself is on the Python path.
+FROM_SCRATCH_DIR = Path(__file__).resolve().parent.parent / "from_scratch"
+sys.path.insert(0, str(FROM_SCRATCH_DIR))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-app = FastAPI(title="LipRead Studio API", version="1.0.0")
+from inference import predict_word          # Person C's function
+from preprocess_upload import preprocess_upload_video  # Person A's function
+
+app = FastAPI(title="LipSense API", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -31,8 +40,11 @@ async def predict(video: UploadFile = File(...)):
         temp_file.write(await video.read())
 
     try:
-        prediction = predict_from_video(str(temp_path))
-        return {"prediction": prediction}
+        # Person A's step: raw video -> numpy lip clip, shape (20, 96, 96)
+        clip = preprocess_upload_video(str(temp_path))
+        # Person C's step: numpy clip -> predicted word + confidence + all_scores
+        result = predict_word(clip)
+        return result
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
     finally:

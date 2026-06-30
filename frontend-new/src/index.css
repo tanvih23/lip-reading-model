@@ -1,0 +1,907 @@
+/*
+ * styles.css — LipReader Frontend
+ * TAM-VIT AI/ML Club
+ *
+ * Retro pixel game aesthetic:
+ *   - Cream striped background (horizontal bands one shade darker)
+ *   - Bold blue (#3535c8) + pink (#ff6eb4) accent palette
+ *   - Press Start 2P pixel font throughout
+ *   - Pixel window chrome with traffic-light dots
+ *   - Animated pixel cursor, floating decorations, shimmer button
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+/* ── design tokens ──────────────────────────────────────────── */
+:root {
+  --cr:  #fef6e8;   /* cream — main background */
+  --cr2: #f5ecda;   /* cream dark — stripe band */
+  --bl:  #3535c8;   /* bold pixel blue */
+  --bl2: #2020a0;   /* darker blue — shadows/borders */
+  --bl3: #e8eaff;   /* light blue tint — panel backgrounds */
+  --pk:  #ff6eb4;   /* pink accent */
+  --pk2: #ffe0f0;   /* light pink */
+  --gn:  #2ec46a;   /* green — success / accuracy */
+  --yw:  #f7c94b;   /* yellow — warning / decorations */
+  --rd:  #e83a3a;   /* red — error / close button */
+  --bk:  #1a1040;   /* near-black — text and borders */
+  --gy:  #8878aa;   /* muted purple-grey — secondary text */
+  --wh:  #ffffff;
+  --fp:  'Press Start 2P', monospace;
+}
+
+/* ── reset ──────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body, #root { min-height: 100vh; }
+
+body {
+  font-family: var(--fp);
+  background: var(--cr);
+  color: var(--bk);
+  /*
+   * Custom pixel cursor built from an inline SVG.
+   * Looks like a chunky arrow with a pink left edge.
+   */
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Crect x='0' y='0' width='4' height='16' fill='%231a1040'/%3E%3Crect x='4' y='4' width='4' height='4' fill='%231a1040'/%3E%3Crect x='8' y='8' width='4' height='4' fill='%231a1040'/%3E%3Crect x='4' y='12' width='4' height='4' fill='%231a1040'/%3E%3Crect x='8' y='16' width='4' height='4' fill='%231a1040'/%3E%3Crect x='1' y='0' width='2' height='16' fill='%23ff6eb4'/%3E%3C/svg%3E") 0 0, auto;
+}
+
+/* ── striped background ─────────────────────────────────────── */
+/*
+ * Applied to both .app and .start so both screens have the same
+ * horizontal stripe pattern. Repeating-linear-gradient creates
+ * thin darker bands every 32px.
+ */
+.app, .start {
+  background-image: repeating-linear-gradient(
+    0deg,
+    var(--cr)  0px,
+    var(--cr)  28px,
+    var(--cr2) 28px,
+    var(--cr2) 32px
+  );
+}
+
+/* ════════════════════════════════════════
+   PIXEL DECORATIONS
+   Pure CSS pixel art shapes — no images.
+   Each shape is built from multiple
+   background-image gradients as pixel blocks.
+════════════════════════════════════════ */
+.deco {
+  position: fixed;
+  pointer-events: none;
+  z-index: 0;
+  image-rendering: pixelated;
+}
+
+/* pixel heart */
+.deco-heart {
+  width: 20px; height: 18px;
+  background:
+    linear-gradient(var(--pk) 0%, var(--pk) 100%) 2px 0   / 6px 6px  no-repeat,
+    linear-gradient(var(--pk) 0%, var(--pk) 100%) 10px 0  / 6px 6px  no-repeat,
+    linear-gradient(var(--pk) 0%, var(--pk) 100%) 0 4px   / 18px 6px no-repeat,
+    linear-gradient(var(--pk) 0%, var(--pk) 100%) 2px 10px / 14px 4px no-repeat,
+    linear-gradient(var(--pk) 0%, var(--pk) 100%) 6px 18px / 6px 2px  no-repeat;
+  animation: deco-bob 3s ease-in-out infinite;
+  opacity: 0.7;
+}
+
+/* pixel diamond */
+.deco-diamond {
+  width: 16px; height: 20px;
+  background:
+    linear-gradient(var(--bl) 0%, var(--bl) 100%) 6px 0    / 4px 4px  no-repeat,
+    linear-gradient(var(--bl) 0%, var(--bl) 100%) 2px 4px  / 12px 4px no-repeat,
+    linear-gradient(var(--bl) 0%, var(--bl) 100%) 0 8px    / 16px 4px no-repeat,
+    linear-gradient(var(--bl) 0%, var(--bl) 100%) 2px 12px / 12px 4px no-repeat,
+    linear-gradient(var(--bl) 0%, var(--bl) 100%) 6px 16px / 4px 4px  no-repeat;
+  animation: deco-bob 4s ease-in-out infinite;
+  opacity: 0.5;
+}
+
+/* pixel plus/star */
+.deco-star {
+  width: 16px; height: 16px;
+  background:
+    linear-gradient(var(--yw) 0%, var(--yw) 100%) 6px 0  / 4px 16px no-repeat,
+    linear-gradient(var(--yw) 0%, var(--yw) 100%) 0 6px  / 16px 4px no-repeat;
+  animation: deco-spin 6s linear infinite;
+  opacity: 0.6;
+}
+
+/* three dots in a row */
+.deco-dot-trio {
+  width: 6px; height: 6px;
+  background: var(--pk);
+  box-shadow: 10px 0 0 var(--bl), 20px 0 0 var(--yw);
+  animation: deco-bob 2.5s ease-in-out infinite;
+  opacity: 0.5;
+}
+
+@keyframes deco-bob {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-8px); }
+}
+
+@keyframes deco-spin {
+  100% { transform: rotate(360deg); }
+}
+
+/* ════════════════════════════════════════
+   START SCREEN
+════════════════════════════════════════ */
+.start {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.start-inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* the main card on the start screen */
+.start-card {
+  border: 4px solid var(--bl);
+  /* layered box-shadow creates a double border with a gap */
+  box-shadow:
+    6px 6px 0 var(--bl),
+    0 0 0 8px var(--cr),
+    0 0 0 12px var(--pk);
+  background: var(--cr);
+  min-width: min(400px, 88vw);
+}
+
+.start-card-tb {
+  background: var(--bl);
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 3px solid var(--bl2);
+}
+
+.start-card-url {
+  font-size: 0.44rem;
+  color: var(--bl3);
+  letter-spacing: 0.06em;
+}
+
+.start-card-body {
+  padding: 24px 28px;
+  text-align: center;
+}
+
+.start-tag {
+  font-size: 0.42rem;
+  color: var(--gy);
+  letter-spacing: 0.18em;
+  margin-bottom: 14px;
+}
+
+.start-heading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+/* "LIP" in pink */
+.start-h-line1 {
+  font-size: clamp(2.4rem, 10vw, 4.2rem);
+  color: var(--pk);
+  text-shadow: 3px 3px 0 var(--bl), 5px 5px 0 rgba(53,53,200,0.3);
+  letter-spacing: 0.1em;
+  line-height: 1;
+  display: block;
+}
+
+/* "READER" in blue */
+.start-h-line2 {
+  font-size: clamp(2.4rem, 10vw, 4.2rem);
+  color: var(--bl);
+  text-shadow: 3px 3px 0 var(--bk);
+  letter-spacing: 0.1em;
+  line-height: 1;
+  display: block;
+}
+
+.start-sub {
+  font-size: 0.44rem;
+  color: var(--gy);
+  letter-spacing: 0.1em;
+  margin-bottom: 20px;
+}
+
+.start-bar-wrap { margin-bottom: 14px; }
+
+.start-bar-lbl {
+  font-size: 0.4rem;
+  color: var(--gy);
+  letter-spacing: 0.1em;
+  margin-top: 8px;
+  text-align: center;
+}
+
+.start-btns {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+/* PLAY button — pink, punchy */
+.btn-play {
+  font-family: var(--fp);
+  font-size: 0.5rem;
+  padding: 9px 20px;
+  background: var(--pk);
+  color: var(--wh);
+  border: 3px solid var(--bk);
+  box-shadow: 3px 3px 0 var(--bk);
+  cursor: pointer;
+  letter-spacing: 0.08em;
+  transition: transform 0.06s, box-shadow 0.06s;
+}
+
+.btn-play:hover  { transform: translate(-1px,-1px); box-shadow: 4px 4px 0 var(--bk); }
+.btn-play:active { transform: translate(3px,3px);   box-shadow: 0 0 0 var(--bk); }
+
+/* MENU button — blue */
+.btn-menu {
+  font-family: var(--fp);
+  font-size: 0.5rem;
+  padding: 9px 18px;
+  background: var(--bl);
+  color: var(--wh);
+  border: 3px solid var(--bk);
+  box-shadow: 3px 3px 0 var(--bk);
+  cursor: pointer;
+  letter-spacing: 0.08em;
+  transition: transform 0.06s, box-shadow 0.06s;
+}
+
+.btn-menu:hover { transform: translate(-1px,-1px); box-shadow: 4px 4px 0 var(--bk); }
+
+/* EXIT button — ghost style */
+.btn-exit {
+  font-family: var(--fp);
+  font-size: 0.5rem;
+  padding: 9px 16px;
+  background: var(--cr);
+  color: var(--gy);
+  border: 3px solid var(--gy);
+  box-shadow: 3px 3px 0 rgba(136,120,170,0.4);
+  cursor: pointer;
+  letter-spacing: 0.08em;
+}
+
+/* blinking "press any key" text */
+.start-press { font-size: 0.44rem; color: var(--bl); letter-spacing: 0.1em; }
+.op1 { opacity: 1; }
+.op0 { opacity: 0; }
+
+/* ════════════════════════════════════════
+   APP SHELL
+════════════════════════════════════════ */
+.app {
+  min-height: 100vh;
+  padding: 0 14px 52px;
+  position: relative;
+}
+
+/* ── header ── */
+.app-hdr {
+  position: relative;
+  z-index: 10;
+  margin-bottom: 14px;
+}
+
+.app-hdr-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--bl);
+  border-bottom: 4px solid var(--bl2);
+}
+
+.hdr-logo-wrap {
+  position: relative;
+  overflow: hidden;
+}
+
+.hdr-logo {
+  font-size: 0.7rem;
+  color: var(--wh);
+  letter-spacing: 0.08em;
+  display: inline-block;
+  position: relative;
+}
+
+/*
+ * Sweeping shine effect on the logo.
+ * --scan-y is set from React state (increments 0-110%)
+ * so the highlight moves left to right continuously.
+ */
+.hdr-logo::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  left: calc(var(--scan-y, 0%) - 20%);
+  width: 20%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255,255,255,0.35),
+    transparent
+  );
+  pointer-events: none;
+}
+
+.hdr-center { display: flex; align-items: center; gap: 12px; }
+
+.hdr-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.44rem;
+  color: var(--wh);
+  letter-spacing: 0.1em;
+  background: var(--bl2);
+  padding: 5px 10px;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+/* square LED indicator — color changes by status class */
+.status-led {
+  width: 8px; height: 8px;
+  display: inline-block;
+  background: var(--yw);   /* default: yellow = idle */
+  flex-shrink: 0;
+}
+
+/* green pulsing = complete */
+.status-COMPLETE .status-led {
+  background: var(--gn);
+  animation: led-pulse 1s ease-in-out infinite;
+}
+
+/* pink rapid blink = analyzing */
+.status-ANALYZING .status-led {
+  background: var(--pk);
+  animation: led-blink 0.25s step-end infinite;
+}
+
+/* red blink = error */
+.status-ERROR .status-led {
+  background: var(--rd);
+  animation: led-blink 0.4s step-end infinite;
+}
+
+@keyframes led-pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+@keyframes led-blink { 50% { opacity:0; } }
+
+.hdr-clock {
+  font-size: 0.48rem;
+  color: rgba(255,255,255,0.7);
+  letter-spacing: 0.06em;
+}
+
+/* pink / yellow / blue repeating stripe under header */
+.hdr-border-deco {
+  height: 6px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--pk)  0px,  var(--pk)  12px,
+    var(--yw) 12px, var(--yw) 24px,
+    var(--bl) 24px, var(--bl) 36px,
+    var(--pk) 36px, var(--pk) 48px
+  );
+}
+
+/* ── two-column layout ── */
+.layout {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 12px;
+  max-width: 1060px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+.col-l, .col-r { display: flex; flex-direction: column; gap: 12px; }
+
+/* ════════════════════════════════════════
+   RETRO WINDOWS
+════════════════════════════════════════ */
+.win {
+  background: var(--wh);
+  border: 3px solid var(--bk);
+  box-shadow: 5px 5px 0 var(--bk);
+}
+
+/* accent variant — blue border + pink title bar */
+.win-accent {
+  border-color: var(--bl);
+  box-shadow: 5px 5px 0 var(--bl);
+}
+
+.win-tb {
+  background: var(--bl);
+  padding: 6px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 3px solid var(--bk);
+}
+
+.win-accent > .win-tb {
+  background: var(--pk);
+  border-bottom-color: var(--bl);
+}
+
+/* traffic-light style window dots */
+.win-dots { display: flex; gap: 4px; }
+.win-dots span {
+  width: 10px; height: 10px;
+  border: 1px solid rgba(0,0,0,0.2);
+  display: block;
+}
+.win-dots span:nth-child(1) { background: var(--yw); }   /* yellow = minimise */
+.win-dots span:nth-child(2) { background: var(--gn); }   /* green  = maximise */
+.win-dots span:nth-child(3) { background: var(--rd); }   /* red    = close    */
+
+.win-title {
+  font-size: 0.48rem;
+  color: var(--wh);
+  letter-spacing: 0.08em;
+}
+
+.win-x {
+  font-family: var(--fp);
+  font-size: 0.44rem;
+  background: var(--rd);
+  color: var(--wh);
+  border: 2px solid var(--bk);
+  padding: 2px 6px;
+  cursor: pointer;
+}
+
+.win-body { padding: 14px; }
+
+/* ── drop zone ── */
+.dropzone {
+  display: grid;
+  place-items: center;
+  min-height: 140px;
+  border: 3px dashed var(--gy);
+  /* subtle diagonal hatch pattern over light blue background */
+  background:
+    repeating-linear-gradient(
+      45deg,
+      transparent, transparent 8px,
+      rgba(53,53,200,0.03) 8px, rgba(53,53,200,0.03) 16px
+    ),
+    var(--bl3);
+  cursor: pointer;
+  margin-bottom: 12px;
+  transition: border-color 0.1s, background 0.1s;
+}
+
+.dz-over { border-color: var(--bl); border-style: solid; background: rgba(53,53,200,0.06); }
+.dz-has  { border-color: var(--gn); border-style: solid; background: rgba(46,196,106,0.06); }
+
+.dz-inner { text-align: center; padding: 12px; }
+
+/* icon bobs up and down when no file loaded */
+.dz-icon {
+  font-size: 0.7rem;
+  color: var(--bl);
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+  animation: icon-bob 2s ease-in-out infinite;
+}
+
+.dz-icon-loaded { color: var(--gn); animation: none; }
+
+@keyframes icon-bob {
+  0%,100% { transform: translateY(0); }
+  50%     { transform: translateY(-4px); }
+}
+
+.dz-main  { font-size: 0.52rem; color: var(--bk); margin-bottom: 6px; letter-spacing: 0.06em; }
+.dz-hint  { font-size: 0.38rem; color: var(--gy); letter-spacing: 0.08em; }
+.dz-fname { font-size: 0.42rem; color: var(--bl); margin-bottom: 4px; word-break: break-all; padding: 0 8px; letter-spacing: 0.04em; }
+
+/* ── run button ── */
+.run-btn {
+  width: 100%;
+  font-family: var(--fp);
+  font-size: 0.56rem;
+  padding: 12px;
+  background: var(--pk);
+  color: var(--wh);
+  border: 3px solid var(--bk);
+  box-shadow: 4px 4px 0 var(--bk);
+  cursor: pointer;
+  letter-spacing: 0.08em;
+  margin-bottom: 10px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.06s, box-shadow 0.06s;
+}
+
+/*
+ * Shimmer sweep — a white diagonal band starts off-screen left,
+ * moves to off-screen right on hover via CSS transition.
+ */
+.run-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -60%;
+  width: 40%; height: 100%;
+  background: linear-gradient(
+    90deg, transparent, rgba(255,255,255,0.35), transparent
+  );
+  transition: left 0s;
+}
+
+.run-btn:hover:not(:disabled)::before {
+  left: 140%;
+  transition: left 0.5s ease;
+}
+
+.run-btn:hover:not(:disabled) { transform: translate(-1px,-1px); box-shadow: 5px 5px 0 var(--bk); }
+.run-btn:active:not(:disabled){ transform: translate(4px,4px);   box-shadow: 0 0 0 var(--bk); }
+.run-btn:disabled { opacity: 0.65; cursor: progress; }
+
+/* ── error panel ── */
+.error-box {
+  border: 2px solid var(--rd);
+  background: rgba(232,58,58,0.06);
+  padding: 10px 12px;
+  font-size: 0.42rem;
+  color: var(--rd);
+  letter-spacing: 0.06em;
+  line-height: 1.9;
+  margin-top: 8px;
+}
+
+.err-tag { color: var(--yw); background: var(--rd); padding: 0 4px; }
+
+/* ── video preview ── */
+.preview-vid {
+  width: 100%;
+  aspect-ratio: 16/9;
+  object-fit: cover;
+  display: block;
+  border: 2px solid var(--gy);
+}
+
+.preview-empty {
+  min-height: 110px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  background: var(--bl3);
+  border: 2px dashed var(--gy);
+  padding: 16px;
+  gap: 6px;
+}
+
+.pe-icon { font-size: 0.7rem; color: var(--gy); }
+.pe-txt  { font-size: 0.46rem; color: var(--gy); letter-spacing: 0.08em; }
+.pe-sub  { font-size: 0.36rem; color: var(--gy); letter-spacing: 0.08em; }
+
+/* ── result hero ── */
+.result-hero {
+  background: var(--bl);
+  padding: 18px;
+  text-align: center;
+  margin-bottom: 12px;
+  border: 2px solid var(--bl2);
+}
+
+.result-label {
+  font-size: 0.4rem;
+  color: rgba(232,234,255,0.6);
+  letter-spacing: 0.15em;
+  margin-bottom: 10px;
+}
+
+/* predicted word — large, white, pink shadow */
+.result-word {
+  font-size: clamp(1.8rem, 5.5vw, 2.8rem);
+  color: var(--wh);
+  text-shadow: 3px 3px 0 var(--pk), 0 0 20px rgba(255,110,180,0.4);
+  letter-spacing: 0.06em;
+  line-height: 1.1;
+  margin-bottom: 10px;
+  min-height: 1.2em;   /* prevents layout jump while typing animation runs */
+}
+
+/* blinking cursor shown after typing finishes */
+.typing-cur { color: var(--pk); font-size: 0.8em; }
+
+.result-conf {
+  font-size: 0.42rem;
+  color: var(--bl3);
+  letter-spacing: 0.1em;
+  margin-bottom: 10px;
+}
+
+/* ── all-scores panel ── */
+.scores {
+  background: var(--bl3);
+  border: 2px solid rgba(53,53,200,0.2);
+  padding: 10px;
+}
+
+.scores-lbl {
+  font-size: 0.38rem;
+  color: var(--bl2);
+  letter-spacing: 0.14em;
+  margin-bottom: 10px;
+}
+
+.wbar {
+  display: grid;
+  grid-template-columns: 58px 1fr 30px;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 5px;
+}
+
+.wbar-lbl { font-size: 0.32rem; color: var(--gy); text-align: right; letter-spacing: 0.04em; }
+.wbar-top .wbar-lbl { color: var(--pk); }   /* highlight winning word */
+
+.wbar-track {
+  height: 9px;
+  background: rgba(53,53,200,0.12);
+  border: 1px solid rgba(53,53,200,0.15);
+  overflow: hidden;
+}
+
+.wbar-fill {
+  height: 100%;
+  background: var(--bl);
+  transition: width 0.5s steps(10);   /* stepped transition = pixel feel */
+}
+
+.wbar-top .wbar-fill { background: var(--pk); }
+
+.wbar-pct { font-size: 0.3rem; color: var(--gy); text-align: right; }
+.wbar-top .wbar-pct { color: var(--pk); }
+
+/* ── result empty state ── */
+.result-empty {
+  min-height: 200px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  background: var(--bl3);
+  border: 3px dashed rgba(53,53,200,0.25);
+  padding: 20px;
+  gap: 8px;
+}
+
+.re-icon  { font-size: 0.8rem; color: var(--bl); }
+.re-title { font-size: 0.5rem; color: var(--bl); letter-spacing: 0.1em; }
+.re-sub   { font-size: 0.36rem; color: var(--gy); letter-spacing: 0.08em; }
+
+/* ── sysinfo table ── */
+.sys-tbl {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.4rem;
+}
+
+.sys-tbl td {
+  padding: 6px 8px;
+  border-bottom: 2px solid var(--bl3);
+  letter-spacing: 0.06em;
+}
+
+.sys-tbl td:first-child { color: var(--gy); width: 80px; }
+.sys-tbl td:last-child  { color: var(--bl); font-weight: bold; }
+.sys-acc { color: var(--gn) !important; }   /* accuracy row in green */
+
+/* ── pixel progress bar ── */
+.pbar {
+  display: flex;
+  gap: 2px;
+  background: var(--cr);
+  border: 2px solid var(--bk);
+  padding: 2px;
+}
+
+.pbar-b    { flex: 1; height: 12px; background: rgba(0,0,0,0.06); }
+.pbar-pink { background: linear-gradient(180deg, var(--pk), #e04090); }
+.pbar-blue { background: linear-gradient(180deg, var(--bl), var(--bl2)); }
+
+/* ── taskbar ── */
+.taskbar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 42px;
+  background: var(--bl);
+  border-top: 3px solid var(--bk);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 8px;
+  z-index: 100;
+}
+
+.tb-start {
+  font-family: var(--fp);
+  font-size: 0.48rem;
+  padding: 6px 12px;
+  background: var(--pk);
+  color: var(--wh);
+  border: 2px solid var(--bk);
+  box-shadow: 3px 3px 0 var(--bk);
+  cursor: pointer;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  transition: transform 0.05s, box-shadow 0.05s;
+}
+
+.tb-start:hover  { transform: translate(-1px,-1px); box-shadow: 4px 4px 0 var(--bk); }
+.tb-start:active { transform: translate(2px,2px);   box-shadow: 0 0 0 var(--bk); }
+
+.tb-mid { display: flex; gap: 3px; flex: 1; overflow: hidden; }
+
+.tb-item {
+  font-family: var(--fp);
+  font-size: 0.36rem;
+  padding: 5px 10px;
+  background: var(--bl2);
+  color: rgba(232,234,255,0.7);
+  border: 1px solid rgba(255,255,255,0.15);
+  cursor: pointer;
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+}
+
+/* active taskbar item — white background, blue text */
+.tb-on {
+  background: var(--wh);
+  color: var(--bl);
+  border-color: var(--cr);
+}
+
+.tb-clock {
+  font-size: 0.44rem;
+  color: var(--wh);
+  padding: 5px 10px;
+  background: var(--bl2);
+  border: 1px solid rgba(255,255,255,0.15);
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+}
+
+/* ── utilities ── */
+.mt8 { margin-top: 8px; }
+
+/* ── responsive ── */
+@media (max-width: 780px) {
+  .layout { grid-template-columns: 1fr; }
+  .tb-mid { display: none; }
+}
+
+/* ── custom scrollbar ── */
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: var(--cr2); }
+::-webkit-scrollbar-thumb {
+  background: var(--bl);
+  border: 2px solid var(--bk);
+}
+
+/* ════════════════════════════════════════
+   LIP PREVIEW — matches retro window style
+════════════════════════════════════════ */
+
+.lip-preview-card {
+  margin-top: 10px;
+  background: var(--bl3);
+  border: 2px solid var(--bd2, var(--gy));
+}
+
+.lip-preview-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  background: var(--bl);
+  border-bottom: 2px solid var(--bk);
+}
+
+.lip-preview-icon {
+  width: 12px;
+  height: 12px;
+  color: var(--wh);
+  flex-shrink: 0;
+}
+
+.lip-preview-label {
+  font-family: var(--fp);
+  font-size: 0.4rem;
+  color: var(--wh);
+  letter-spacing: 0.08em;
+  flex: 1;
+}
+
+.lip-preview-badge {
+  font-family: var(--fp);
+  font-size: 0.34rem;
+  color: var(--bk);
+  background: var(--gn);
+  padding: 2px 6px;
+  letter-spacing: 0.06em;
+  animation: led-pulse 1s ease-in-out infinite;
+}
+
+.lip-preview-body {
+  padding: 10px;
+  min-height: 90px;
+  display: grid;
+  place-items: center;
+}
+
+/* loading / no-face / error state container */
+.lip-preview-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+  padding: 10px;
+}
+
+.lip-preview-state--warn .lip-preview-warn-icon {
+  color: var(--rd);
+}
+
+.lip-preview-spinner {
+  width: 18px;
+  height: 18px;
+  border: 3px solid var(--gy);
+  border-top-color: var(--bl);
+  border-radius: 50%;
+  animation: lip-spin 0.7s linear infinite;
+}
+
+@keyframes lip-spin {
+  to { transform: rotate(360deg); }
+}
+
+.lip-preview-warn-icon {
+  width: 20px;
+  height: 20px;
+  color: var(--gy);
+}
+
+.lip-preview-state-text {
+  font-size: 0.42rem;
+  color: var(--gy);
+  letter-spacing: 0.04em;
+  line-height: 1.6;
+  max-width: 220px;
+}
+
+/* the actual cropped lip canvas */
+.lip-preview-canvas {
+  max-width: 100%;
+  border: 2px solid var(--bk);
+  image-rendering: pixelated;
+}
